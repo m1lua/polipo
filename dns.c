@@ -39,6 +39,7 @@ const int dnsUseGethostbyname = 0;
 #ifndef NO_FANCY_RESOLVER
 AtomPtr dnsNameServer = NULL;
 int dnsMaxTimeout = 60;
+int dnsNamePort = 53;
 #endif
 
 #ifndef NO_STANDARD_RESOLVER
@@ -210,6 +211,9 @@ preinitDns()
                     "TTL for negative DNS replies with no TTL.");
     CONFIG_VARIABLE(dnsNameServer, CONFIG_ATOM_LOWER,
                     "The name server to use.");
+    CONFIG_VARIABLE(dnsNamePort, CONFIG_INT,
+                    "The port of DNS server to use.");
+
 #ifndef NO_STANDARD_RESOLVER
     CONFIG_VARIABLE(dnsUseGethostbyname, CONFIG_TETRASTATE,
                     "Use the system resolver.");
@@ -241,12 +245,12 @@ initDns()
     gettimeofday(&t, NULL);
     idSeed = t.tv_usec & 0xFFFF;
     sin->sin_family = AF_INET;
-    sin->sin_port = htons(53);
+    sin->sin_port = htons(dnsNamePort);
     rc = inet_aton(dnsNameServer->string, &sin->sin_addr);
 #ifdef HAVE_IPv6
     if(rc != 1) {
         sin6->sin6_family = AF_INET6;
-        sin6->sin6_port = htons(53);
+        sin6->sin6_port = htons(dnsNamePort);
         rc = inet_pton(AF_INET6, dnsNameServer->string, &sin6->sin6_addr);
     }
 #endif
